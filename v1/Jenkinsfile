@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+    environment {
+        IMAGE   = 'shivanesh77/online-exam'
+        VERSION = 'v1'
+    }
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+        stage('Install & Test') {
+            steps {
+                dir('v1') {
+                    bat 'pip install -r requirements.txt pytest'
+                    bat 'python -m pytest -q'
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir('v1') {
+                    bat 'docker build -t %IMAGE%:%VERSION% .'
+                }
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                                                  usernameVariable: 'DH_USER',
+                                                  passwordVariable: 'DH_PASS')]) {
+                    bat 'docker login -u %DH_USER% -p %DH_PASS%'
+                    bat 'docker push %IMAGE%:%VERSION%'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                bat 'kubectl apply -f k8s/v1.yaml'
+                bat 'kubectl rollout status deployment/exam-v1 --timeout=120s'
+            }
+        }
+    }
+}
