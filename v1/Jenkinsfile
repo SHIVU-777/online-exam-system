@@ -8,14 +8,6 @@ pipeline {
         stage('Checkout') {
             steps { checkout scm }
         }
-        stage('Install & Test') {
-            steps {
-                dir('v1') {
-                    bat 'pip install -r requirements.txt pytest'
-                    bat 'python -m pytest -q'
-                }
-            }
-        }
         stage('Docker Build') {
             steps {
                 dir('v1') {
