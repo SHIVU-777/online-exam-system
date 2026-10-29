@@ -1,8 +1,10 @@
 pipeline {
     agent any
     environment {
-        IMAGE   = 'shivanesh77/online-exam'
-        VERSION = 'v1'
+        IMAGE      = 'shivanesh77/online-exam'
+        VERSION    = 'v1'
+        PATH       = "C:\\Users\\SHIVANESH\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+        KUBECONFIG = 'C:\\Users\\SHIVANESH\\.kube\\config'
     }
     stages {
         stage('Checkout') {
